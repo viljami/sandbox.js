@@ -65,7 +65,7 @@
 
         mvPushMatrix();
 
-        mat4.rotate(mvMatrix, mvMatrix, degToRad(item.rotation), [0, 1, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(item.rotation), item.rotationAxis);
         gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, item.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -98,12 +98,15 @@
         });
       },
 
-      createItem: function(vertices, colors, position){
+      createItem: function(options){
+        var vertices = options.vertices;
+        var colors = options.colors;
         var item = {
           vertexPositionBuffer: gl.createBuffer(),
           vertexColorBuffer: gl.createBuffer(),
-          position: position,
-          rotation: 0
+          position: options.position,
+          rotation: options.rotation || 0,
+          rotationAxis: options.rotationAxis || [0, 1, 0]
         };
 
         var buffer = item.vertexPositionBuffer;
@@ -157,8 +160,18 @@
     1.0, 1.0, 1.0, 1.0
   ];
 
-  triangle = lib.createItem(triangleVertices, triangleColors, [-1.5, 0.0, -7.0]);
-  square = lib.createItem(squareVertices, squareColors, [3.0, 0.0, 0.0]);
+  triangle = lib.createItem({
+    vertices: triangleVertices,
+    colors: triangleColors,
+    position: [-1.5, 0.0, -7.0],
+    rotationAxis: [1, 0, 0]
+  });
+  square = lib.createItem({
+    vertices: squareVertices,
+    colors: squareColors,
+    position: [3.0, 0.0, 0.0],
+    rotationAxis: [0, 0, 1]
+  });
 
   document.addEventListener(window.visibilityChange, function(){
     if (! document[window.visibilityHidden]) {
