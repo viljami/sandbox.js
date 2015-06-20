@@ -2,7 +2,7 @@
     var lib = (function(){
     var mvMatrix = mat4.create();
     var pMatrix = mat4.create();
-    var buffers = [];
+    var items = [];
     var shaderTypes;
 
     var getShader = function (gl, id) {
@@ -59,12 +59,16 @@
       mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
       mat4.identity(mvMatrix);
 
-      buffers.forEach(function(buffer){
-        mat4.translate(mvMatrix, buffer.m_position);
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, buffer.itemSize, gl.FLOAT, false, 0, 0);
+      items.forEach(function(item){
+        mat4.translate(mvMatrix, item.position);
+        gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, item.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, item.vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
         setMatrixUniforms(gl, shaderProgram);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, buffer.numItems);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, item.vertexPositionBuffer.numItems);
       });
     }
 
@@ -91,40 +95,54 @@
         setTimeout(draw, 100);
       },
 
-      createBuffer: function(vertices, position){
-        var buffer = gl.createBuffer();
+      createItem: function(vertices, colors, position){
+        var item = {
+          vertexPositionBuffer: gl.createBuffer(),
+          vertexColorBuffer: gl.createBuffer(),
+          position: position
+        };
+
+        var buffer = item.vertexPositionBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         buffer.itemSize = 3;
         buffer.numItems = vertices.length / 3;
-        buffer.m_position = position;
-        buffers.push(buffer);
-        return buffer;
+
+        var colorBuffer = item.vertexColorBuffer;
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        colorBuffer.itemSize = 4;
+        colorBuffer.numItems = colors.length / 4;
+
+        items.push(item);
+        return item;
       }
     };
   })();
 
   lib.init(document.getElementById('lesson01-canvas'));
-  var triangleVertices = new Float32Array([
+  var triangleVertices = [
        0.0,  1.0,  0.0,
       -1.0, -1.0,  0.0,
        1.0, -1.0,  0.0
-  ]);
-  var squareVertices = new Float32Array([
+  ];
+  var triangleColors = [
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0
+  ];
+  var squareVertices = [
        1.0,  1.0,  0.0,
       -1.0,  1.0,  0.0,
        1.0, -1.0,  0.0,
       -1.0, -1.0,  0.0
-  ]);
-
-  triangleVertexPositionBuffer = lib.createBuffer(triangleVertices, [-1.5, 0.0, -7.0]);
-  squareVertexPositionBuffer = lib.createBuffer(squareVertices, [3.0, 0.0, 0.0]);
-
-
-  function loop(){
-    setTimeout(loop, 1000);
-    for (var i = 0; i < triangleVertices.length; i++) triangleVertices[i] *= -1;
-    lib.createBuffer(triangleVertices, [-1.5, 0.0, -7.0])
-  }
-  loop();
+  ];
+  var squareColors = [
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0
+  ];
+  triangleVertexPositionBuffer = lib.createItem(triangleVertices, triangleColors, [-1.5, 0.0, -7.0]);
+  squareVertexPositionBuffer = lib.createItem(squareVertices, squareColors, [3.0, 0.0, 0.0]);
 })();
