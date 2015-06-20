@@ -5,6 +5,21 @@
     var items = [];
     var shaderTypes;
 
+    var mvMatrixStack = [];
+    function mvPushMatrix() {
+      mvMatrixStack.push(mat4.clone(mvMatrix));
+    }
+
+    function mvPopMatrix() {
+      if (mvMatrixStack.length == 0) {
+        throw 'Invalid popMatrix!';
+      }
+      mvMatrix = mvMatrixStack.pop();
+    }
+
+    function degToRad(degrees) {
+        return degrees * Math.PI / 180;
+    }
 
     var initShaders = function(gl, filePaths){
       return loadShaders(gl, filePaths)
@@ -47,6 +62,10 @@
 
       items.forEach(function(item){
         mat4.translate(mvMatrix, mvMatrix, item.position);
+
+        mvPushMatrix();
+
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(item.rotation), [0, 1, 0]);
         gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, item.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -55,6 +74,8 @@
 
         setMatrixUniforms(gl, shaderProgram);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, item.vertexPositionBuffer.numItems);
+
+        mvPopMatrix();
       });
     }
 
@@ -81,7 +102,8 @@
         var item = {
           vertexPositionBuffer: gl.createBuffer(),
           vertexColorBuffer: gl.createBuffer(),
-          position: position
+          position: position,
+          rotation: 0
         };
 
         var buffer = item.vertexPositionBuffer;
@@ -108,6 +130,8 @@
       '/shaders/color.vs',
       '/shaders/color.fs'
     ]
+  }).then(function(){
+    tick();
   });
 
   var triangleVertices = [
@@ -132,6 +156,28 @@
     0.0, 0.0, 1.0, 1.0,
     1.0, 1.0, 1.0, 1.0
   ];
-  triangleVertexPositionBuffer = lib.createItem(triangleVertices, triangleColors, [-1.5, 0.0, -7.0]);
-  squareVertexPositionBuffer = lib.createItem(squareVertices, squareColors, [3.0, 0.0, 0.0]);
+
+  triangle = lib.createItem(triangleVertices, triangleColors, [-1.5, 0.0, -7.0]);
+  square = lib.createItem(squareVertices, squareColors, [3.0, 0.0, 0.0]);
+
+  document.addEventListener(window.visibilityChange, function(){
+    if (! document[window.visibilityHidden]) {
+      tick();
+    }
+  });
+
+  var lastTime = 0;
+  function tick(){
+    if (! document[window.visibilityHidden]) setTimeout(tick, 1000 / 60);
+
+    var timeNow = new Date().getTime();
+    if (lastTime != 0) {
+      var elapsed = timeNow - lastTime;
+
+      triangle.rotation += (90 * elapsed) / 1000.0;
+      square.rotation += (75 * elapsed) / 1000.0;
+    }
+
+    lastTime = timeNow;
+  };
 })();
