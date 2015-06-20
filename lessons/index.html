@@ -1,0 +1,60 @@
+
+<!-- saved from url=(0052)http://learningwebgl.com/lessons/lesson01/index.html -->
+<!Doctype html>
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Learning WebGL — lessons</title>
+<script type="text/javascript" src="/gl-matrix/dist/gl-matrix-min.js"></script>
+<script type="text/javascript" src="/q/q.js"></script>
+<script type="text/javascript" src="/lib/load-files.js"></script>
+<script type="text/javascript" src="/lib/load-shaders.js"></script>
+<style type="text/css">
+    html, body { width: 100%; height: 100%; }
+    canvas { border: none; }
+    button { width: 100%; display: block; border: 0; background-color: #333; background-color: #eee; }
+</style>
+</head>
+<body>
+    <canvas id="lesson-canvas" width="500" height="500"></canvas>
+    <script src="scripts/lesson-3-colors.js"></script>
+
+    <!--
+    <button id="next" onclick="next();">Next</button>
+    <h1 id="current"></h1>
+    <script>
+    var nextButton = document.getElementById('next');
+    var titleEl = document.getElementById('current');
+    var lessons;
+    var lessonPaths = [
+        '/scripts/lesson-1-basics.js',
+        '/scripts/lesson-2-colors.js',
+        '/scripts/lesson-3-movement.js'
+    ];
+    var current = 0;
+
+
+    loadFiles(lessonPaths)
+    .then(function(scriptStrings){
+        lessons = scriptStrings.map(function(s, i){
+            var name = lessonPaths[i].replace(/(\/scripts\/|.js)/g, '')
+            name = name.replace(/-/g, ' ');
+            return {
+                file: lessonPaths[i],
+                name: name,
+                script: s
+            };
+        });
+        next();
+    });
+
+    function next (){
+        if (! lessons) return;
+        current++;
+        eval(lessons[current].script);
+        titleEl.innerText = lessons[current].name;
+    }
+    </script>
+ -->
+ </body>
+</html>

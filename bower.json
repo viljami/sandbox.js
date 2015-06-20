@@ -1,0 +1,28 @@
+{
+  "name": "webgl-lessons",
+  "version": "0.0.1",
+  "authors": [
+    "Viljami Peltola <viljami.peltola@iki.fi>"
+  ],
+  "description": "WebGl lessons",
+  "main": "index.js",
+  "moduleType": [
+    "amd",
+    "globals"
+  ],
+  "keywords": [
+    "WebGl"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "gl-matrix": "~2.3.1",
+    "q": "1.0.1"
+  }
+}

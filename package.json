@@ -1,0 +1,20 @@
+{
+  "name": "webgl-lessons",
+  "version": "0.0.1",
+  "description": "Getting to know web gl",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "bower install",
+    "start": "gulp"
+  },
+  "keywords": [
+    "webgl",
+    "examples"
+  ],
+  "author": "Viljami Peltola",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-serve": "^1.0.0"
+  }
+}
