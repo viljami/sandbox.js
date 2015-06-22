@@ -96,13 +96,14 @@
               drawScene(gl, shaderProgram);
             }
             draw();
+            return gl;
           });
         },
 
         createBuffer: function(vertices, n){
           var buffer = gl.createBuffer();
           gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
           buffer.itemSize = n;
           buffer.numItems = vertices.length / n;
           return buffer;
@@ -126,13 +127,15 @@
       return api;
   })();
 
+  var gl;
   lib.init({
     canvas: document.getElementById('lesson-canvas'),
     shaderPaths: [
       '/shaders/color.vs',
       '/shaders/color.fs'
     ]
-  }).then(function(){
+  }).then(function(newGl){
+    gl = newGl;
     tick();
   });
 
@@ -183,10 +186,12 @@
   function tick(){
     if (! document[window.visibilityHidden]) setTimeout(tick, 1000 / 60);
 
+    triangleVertices = triangleVertices.map(function(a){ return a ? a + 0.01 : a; });
     var timeNow = new Date().getTime();
     if (lastTime != 0) {
       var elapsed = timeNow - lastTime;
 
+      // gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(triangleVertices))
       triangle.rotation += (90 * elapsed) / 1000.0;
       square.rotation += (75 * elapsed) / 1000.0;
     }

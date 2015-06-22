@@ -86,7 +86,7 @@
 
         var buffer = item.vertexPositionBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
         buffer.itemSize = 3;
         buffer.numItems = vertices.length / 3;
 
