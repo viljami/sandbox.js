@@ -2,7 +2,7 @@ var controls = (function(){
  var keys = [];
  var mouse = {};
  var keydown = function(e){ keys[e.keyCode] = true; };
- var keyup = function(e){ console.log(e.keyCode); keys[e.keyCode] = false; };
+ var keyup = function(e){ keys[e.keyCode] = false; };
  var mousedown = function(e){ mouse.isDown = true; };
  var mouseup = function(e){ mouse.isDown = false; };
  var mousemove = function(e){
