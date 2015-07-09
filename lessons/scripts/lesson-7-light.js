@@ -516,9 +516,9 @@ lib.getTexture('assets/viljami.jpg')
       var elapsed = timeNow - lastTime;
 
 //      triItem.rotation += (90 * elapsed) / 1000.0;
-     if (cubeItem) cubeItem.rotation += (10 * elapsed) / 1000.0;
-//      if (controls.keys[38]) cube.position[2] += 0.1;
-//      if (controls.keys[40]) cube.position[2] -= 0.1;
+     if (cubeItem) cubeItem.rotation += (50 * elapsed) / 1000.0;
+     if (controls.keys[38]) cube.position[2] += 0.1;
+     if (controls.keys[40]) cube.position[2] -= 0.1;
 
     }
 
