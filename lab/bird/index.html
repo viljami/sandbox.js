@@ -1,0 +1,44 @@
+<!Doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Bird</title>
+    <script type="text/javascript" src="/gl-matrix/dist/gl-matrix-min.js"></script>
+    <script type="text/javascript" src="/q/q.js"></script>
+    <script type="text/javascript" src="/module.js/module.js"></script>
+
+    <!-- inject:js -->
+    <script src="/bird/scripts/app.js"></script>
+    <script src="/bird/scripts/bird.js"></script>
+    <script src="/bird/scripts/lib.js"></script>
+    <script src="/lib/controls.js"></script>
+    <script src="/lib/load-files.js"></script>
+    <script src="/lib/load-shaders.js"></script>
+    <script src="/lib/page-visibility-api.js"></script>
+    <script src="/lib/resize.js"></script>
+    <!-- endinject -->
+
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <script>
+    (function(module){
+        module('main', ['app'], function(app){ app.init(); });
+    })(module);
+    </script>
+ </body>
+</html>
