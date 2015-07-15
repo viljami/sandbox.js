@@ -2,3 +2,5 @@ bower_components
 webgl.sublime-project
 webgl.sublime-workspace
 node_modules
+.DS_Store
+
