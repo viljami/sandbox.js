@@ -32,14 +32,26 @@ module('app', [
              0.0,  0.0,  1.0,
              0.0,  0.0,  1.0
         ],
-        position: [-1.5, 0.0, -7.0]
+        position: [0.0, 0.0, -7.0]
       };
 
       triangle.item = lib.createItem(triangle);
 
       var b1 = bird(triangle);
 
-      setInterval(function(){ b1.update(); }, 30 / 1000);
+      var r = -1;
+      var angle = Math.PI / 2;
+
+      setInterval(function(){
+        b1.shape.position[0] -= Math.cos(angle) * r;
+        b1.shape.position[1] -= Math.sin(angle) * r;
+        angle += Math.PI / 1000;
+        if (angle >= Math.PI * 2) angle = 0;
+        b1.shape.position[0] += Math.cos(angle) * r;
+        b1.shape.position[1] += Math.sin(angle) * r;
+
+        b1.update();
+      }, 30 / 1000);
     }
   };
 });
