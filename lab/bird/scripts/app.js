@@ -26,9 +26,6 @@ module('app', [
           0.0, 1.0, 0.0, 1.0,
           0.0, 0.0, 1.0, 1.0
         ],
-        indices: [
-          0, 1, 2
-        ],
         vertexNormals: [
              // front face
              0.0,  0.0,  1.0,

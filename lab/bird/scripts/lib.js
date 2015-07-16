@@ -135,7 +135,6 @@ module('lib', [
         vertexPositionBuffer: api.createBuffer(options.vertices, 3),
         vertexColorBuffer: api.createBuffer(options.colors, 4),
         normalBuffer: api.createBuffer(options.vertexNormals, 3),
-        indicesBuffer: api.createBuffer(options.indices, 3),
         position: options.position
       };
 
