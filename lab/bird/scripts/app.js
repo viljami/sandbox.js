@@ -10,8 +10,8 @@ module('app', [
       lib.init({
         canvas: document.getElementsByTagName('canvas')[0],
         shaderPaths: [
-          '/shaders/color.vs',
-          '/shaders/color.fs'
+          '/shaders/light-color.vs',
+          '/shaders/light-color.fs'
         ]
       });
 
@@ -25,6 +25,15 @@ module('app', [
           1.0, 0.0, 0.0, 1.0,
           0.0, 1.0, 0.0, 1.0,
           0.0, 0.0, 1.0, 1.0
+        ],
+        indices: [
+          0, 1, 2
+        ],
+        vertexNormals: [
+             // front face
+             0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0
         ],
         position: [-1.5, 0.0, -7.0]
       };

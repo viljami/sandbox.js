@@ -55,7 +55,9 @@ module('splitTriangle', function(){
     return {
       vertices: flatten(newVertices),
       colors: flatten(newColors),
-      position: triangle.position,
+      position: Array.apply(null, triangle.position),
+      vertexNormals: triangle.vertexNormals.concat(triangle.vertexNormals),
+      indices: triangle.indices.concat(triangle.indices),
       splitPoint: splitPoint,
       splitIndexes: ii
     };

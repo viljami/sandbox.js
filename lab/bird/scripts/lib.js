@@ -26,11 +26,19 @@ module('lib', [
       shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
       gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
+      shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, 'aVertexNormal');
+      gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
       shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, 'aVertexColor');
       gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
       shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, 'uPMatrix');
       shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, 'uMVMatrix');
+      shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, 'uNMatrix');
+      shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, 'uAmbientColor');
+      shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, 'uLightingDirection');
+      shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, 'uDirectionalColor');
+
       return shaderProgram;
     });
   };
@@ -38,6 +46,10 @@ module('lib', [
   function setMatrixUniforms(gl, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+    var normalMatrix = mat3.create();
+    mat3.normalFromMat4(normalMatrix, mvMatrix);
+    gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
   }
 
   function drawScene(gl, shaderProgram) {
@@ -49,18 +61,38 @@ module('lib', [
 
     items.forEach(function(item){
       mat4.translate(mvMatrix, mvMatrix, item.position);
+
       gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexPositionBuffer);
       gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, item.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexColorBuffer);
       gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, item.vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+      gl.bindBuffer(gl.ARRAY_BUFFER, item.normalBuffer);
+      gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, item.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+      gl.uniform3f(
+        shaderProgram.ambientColorUniform,
+        0.5, 0.5, 0.5
+      );
+
+      var lightingDirection = [0, 0, -1];
+      var adjustedLD = vec3.create();
+      vec3.normalize(adjustedLD, lightingDirection);
+      vec3.scale(adjustedLD, adjustedLD, -1);
+      gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+
+      gl.uniform3f(
+        shaderProgram.directionalColorUniform,
+        0.7, 0.7, 0.7
+      );
+
       setMatrixUniforms(gl, shaderProgram);
       gl.drawArrays(gl.TRIANGLES, 0, item.vertexPositionBuffer.numItems);
     });
   }
 
-  return {
+  var api = {
     init: function(options) {
       var canvas = options.canvas;
       gl = canvas.getContext('webgl');
@@ -84,27 +116,28 @@ module('lib', [
       });
     },
 
-    createItem: function(options){
-      var vertices = options.vertices;
-      var colors = options.colors;
+    createBuffer: function(array, n, type){
+      var ArrayType = Uint16Array;
+      if (! type){
+        type = gl.ARRAY_BUFFER;
+        ArrayType = Float32Array;
+      }
+      var buffer = gl.createBuffer();
+      gl.bindBuffer(type, buffer);
+      gl.bufferData(type, new ArrayType(array), gl.STATIC_DRAW);
+      buffer.itemSize = n;
+      buffer.numItems = array.length / n;
+      return buffer;
+    },
 
+    createItem: function(options){
       var item = {
-        vertexPositionBuffer: gl.createBuffer(),
-        vertexColorBuffer: gl.createBuffer(),
+        vertexPositionBuffer: api.createBuffer(options.vertices, 3),
+        vertexColorBuffer: api.createBuffer(options.colors, 4),
+        normalBuffer: api.createBuffer(options.vertexNormals, 3),
+        indicesBuffer: api.createBuffer(options.indices, 3),
         position: options.position
       };
-
-      var buffer = item.vertexPositionBuffer;
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-      buffer.itemSize = 3;
-      buffer.numItems = vertices.length / 3;
-
-      var colorBuffer = item.vertexColorBuffer;
-      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-      colorBuffer.itemSize = 4;
-      colorBuffer.numItems = colors.length / 4;
 
       items.push(item);
       return item;
@@ -114,4 +147,6 @@ module('lib', [
       items.splice(items.indexOf(item), 1);
     }
   };
+
+  return api;
 });
