@@ -34,7 +34,7 @@ module('app', [
         ],
         position: [0.0, 1.0, -7.0],
         rotation: 0,
-        rotationAxis: [0, 0, 1]
+        rotationAxis: [0, 1, 1]
       };
 
       triangle.item = lib.createItem(triangle);
