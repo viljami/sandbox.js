@@ -12,50 +12,40 @@ module('splitTriangle', function(){
   };
 
   var getSplittingSide = function(vs){
-    return Array.apply(null, vs)
-    .sort()
-    .reduce(function(a, b){
-      if (a.some(function(c){ return c === b; })) return a;
-      a.push(b);
-      return a;
-    }, [])
-    .pop();
+    var sorted = Array.apply(null, vs).sort();
+    if (sorted[0] === sorted[2]) return sorted[0];
+    if (sorted[0] === sorted[1]) return sorted[2];
+    if (sorted[1] === sorted[2]) return sorted[0];
+    return sorted[2];
   };
 
   return function splitTriangleInTwo (triangle){
-    var vertices = triangle.vertices;
-    var colors = triangle.colors;
-
-    var points = [
+    var vertices = triangle.vertices,
+      colors = triangle.colors,
+      points = [
       vertices.slice(0, 3),
       vertices.slice(3, 6),
       vertices.slice(6, 9)
-    ];
-
-    var colors = [
+    ],
+      colors = [
       colors.slice(0, 4),
       colors.slice(4, 8),
       colors.slice(8, 12)
-    ];
-
-    var vs = splitingIndexes.map(function(a){
+    ],
+      vs = splitingIndexes.map(function(a){
       return vec3.distance(points[a[0]], points[a[1]]);
-    });
-
-    var splitting = vs.indexOf(getSplittingSide(vs));
-    var ii = splitingIndexes[splitting];
-    var splitPoint = split(points[ii[0]], points[ii[1]]);
-
-    var selectiveGet = function(n, value){
-      return function(p, i){ return ii[n] === i ? value : p; };
-    };
-
-    var newVertices = [
-      points.map(selectiveGet(0, splitPoint)),
-      points.map(selectiveGet(1, splitPoint))
-    ];
-
-    var splitColor = [];
+    }),
+      splitting = vs.indexOf(getSplittingSide(vs)),
+      ii = splitingIndexes[splitting],
+      splitPoint = split(points[ii[0]], points[ii[1]]),
+      selectiveGet = function(n, value){
+        return function(p, i){ return ii[n] === i ? value : p; };
+      },
+      newVertices = [
+        points.map(selectiveGet(0, splitPoint)),
+        points.map(selectiveGet(1, splitPoint))
+      ],
+      splitColor = [];
     vec4.scale(splitColor, vec4.add([], colors[ii[0]], colors[ii[1]]), 0.5);
     var newColors = [
       colors.map(selectiveGet(0, splitColor)),
