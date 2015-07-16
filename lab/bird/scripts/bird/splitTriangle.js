@@ -58,7 +58,9 @@ module('splitTriangle', function(){
       position: Array.apply(null, triangle.position),
       vertexNormals: triangle.vertexNormals.concat(triangle.vertexNormals),
       splitPoint: splitPoint,
-      splitIndexes: ii
+      splitIndexes: ii,
+      rotation: triangle.rotation,
+      rotationAxis: triangle.rotationAxis
     };
   };
 });

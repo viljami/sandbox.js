@@ -8,6 +8,15 @@ module('lib', [
   var items = [];
   var shaderTypes;
 
+  var mvMatrixStack = [];
+  function mvPushMatrix() {
+    mvMatrixStack.push(mat4.clone(mvMatrix));
+  }
+
+  function mvPopMatrix() {
+    mvMatrix = mvMatrixStack.pop();
+  }
+
   var initShaders = function(gl, filePaths){
     return loadShaders(gl, filePaths)
     .then(function(shaders){
@@ -62,6 +71,10 @@ module('lib', [
     items.forEach(function(item){
       mat4.translate(mvMatrix, mvMatrix, item.position);
 
+      mvPushMatrix();
+
+      mat4.rotate(mvMatrix, mvMatrix, item.rotation, item.rotationAxis);
+
       gl.bindBuffer(gl.ARRAY_BUFFER, item.vertexPositionBuffer);
       gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, item.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -89,6 +102,8 @@ module('lib', [
 
       setMatrixUniforms(gl, shaderProgram);
       gl.drawArrays(gl.TRIANGLES, 0, item.vertexPositionBuffer.numItems);
+
+      mvPopMatrix();
     });
   }
 
@@ -135,7 +150,9 @@ module('lib', [
         vertexPositionBuffer: api.createBuffer(options.vertices, 3),
         vertexColorBuffer: api.createBuffer(options.colors, 4),
         normalBuffer: api.createBuffer(options.vertexNormals, 3),
-        position: options.position
+        position: options.position,
+        rotation: options.rotation,
+        rotationAxis: options.rotationAxis
       };
 
       items.push(item);
