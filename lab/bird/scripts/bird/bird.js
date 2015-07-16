@@ -10,13 +10,15 @@ module('bird', [
   var PI12 = Math.PI + PI02;
   var PI2 = Math.PI * 2;
 
-  var angleInc = function(a){
-    a += FLAP_UNIT;
-    if (a < PI02 && a > PI12) a += FLAP_UNIT;
+  var angleInc = function(a, inc){
+    a += inc;
+    if (a < PI02 && a > PI12) a += inc * 2;
     return a < PI2 ? a : 0;
   };
 
   function Bird (){
+    this.flappingSpeed = FLAP_UNIT;
+
     this.init = function(triangle){
       this.original = triangle;
       this.shape = splitTriangle(triangle);
@@ -39,7 +41,7 @@ module('bird', [
       vertices[this.z1] -= flap;
       vertices[this.z2] -= flap;
 
-      this.wingsAngle = angleInc(this.wingsAngle);
+      this.wingsAngle = angleInc(this.wingsAngle, this.flappingSpeed);
       flap = Math.sin(this.wingsAngle);
 
       vertices[this.z1] += flap;
