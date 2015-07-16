@@ -1,94 +1,61 @@
-module('bird', ['lib'], function(lib){
-  var split = function(a, b){
-    return vec3.sub([], a, vec3.scale([], vec3.sub([], a, b), 0.5));
+module('bird', [
+  'lib',
+  'splitTriangle'
+], function(
+  lib,
+  splitTriangle
+){
+  var FLAP_UNIT = Math.PI / 300;
+  var PI02 = Math.PI / 2;
+  var PI12 = Math.PI + PI02;
+  var PI2 = Math.PI * 2;
+
+  var angleInc = function(a){
+    a += FLAP_UNIT;
+    if (a < PI02 && a > PI12) a += FLAP_UNIT;
+    return a < PI2 ? a : 0;
   };
 
-  var getSplittingSide = function(vs){
-    var lengths = vs.map(vec3.len);
-    var sorted = Array.apply(null, lengths)
-    .sort()
-    .reduce(function(a, b){
-      if (a.some(function(c){ return c === b; })) return a;
-      a.push(b);
-      return a;
-    }, []);
+  function Bird (){
+    this.init = function(triangle){
+      this.original = triangle;
+      this.shape = splitTriangle(triangle);
+      this.shape.item = lib.createItem(this.shape);
 
-    return vs[lengths.indexOf(sorted.pop())];
-  };
+      var ii = this.shape.splitIndexes;
+      var zIndex = 2;
+      // 2 triangles * 3 vertices * 3 points = 18
+      var rot = function(n){ return n < 0 ? 2 : n > 2 ? 0 : n; };
 
-  var splitTriangleInTwo = function(triangle){
-    var newVertices, newColors;
-    var vertices = triangle.vertices;
-    var colors = triangle.colors;
+      this.z1 = 0 + rot(ii[0] - 1) * 3 + zIndex;
+      this.z2 = 9 + rot(ii[1] + 1) * 3 + zIndex;
 
-    var p1 = vertices.slice(0, 3);
-    var p2 = vertices.slice(3, 6);
-    var p3 = vertices.slice(6, 9);
-
-    var c1 = colors.slice(0, 4);
-    var c2 = colors.slice(4, 8);
-    var c3 = colors.slice(8, 12);
-
-    vs = [
-      vec3.distance(p1, p2),
-      vec3.distance(p1, p3),
-      vec3.distance(p2, p3)
-    ];
-
-    var splitted = [];
-    var splitting = vs.indexOf(getSplittingSide(vs));
-
-    if (splitting === 0){
-      var splitted = split(p1, p2);
-      newVertices = [
-        p1.concat(splitted).concat(p3),
-        splitted.concat(p2).concat(p3)
-      ];
-
-      var splitColor = vec4.scale([], vec4.add([], c1, c2), 0.5);
-      newColors = [
-        c1.concat(splitColor).concat(c3),
-        splitColor.concat(c2).concat(c3),
-      ];
-    } else if( splitting === 1){
-      var splitted = split(p1, p3);
-      newVertices = [
-        p1.concat(p2).concat(splitted),
-        splitted.concat(p2).concat(p3)
-      ];
-
-      var splitColor = vec4.scale([], vec4.add([], c1, c3), 0.5);
-      newColors = [
-        c1.concat(c2).concat(splitColor),
-        splitColor.concat(c2).concat(c3),
-      ];
-    } else {
-      var splitted = split(p2, p3);
-      newVertices = [
-        p1.concat(p2).concat(splitted),
-        p1.concat(splitted).concat(p3)
-      ];
-
-      var splitColor = vec4.scale([], vec4.add([], c2, c3), 0.5);
-      newColors = [
-        c1.concat(c2).concat(splitColor),
-        c1.concat(splitColor).concat(c3),
-      ];
-    }
-    newVertices = newVertices[0].concat(newVertices[1]);
-    newColors = newColors[0].concat(newColors[1]);
-
-    return {
-      vertices: newVertices,
-      colors: newColors,
-      position: triangle.position
+      this.wingsAngle = 0;
     };
-  };
 
-  return function(data){
-    var splitted = splitTriangleInTwo(data);
-    lib.removeItem(data.item);
-    splitted.item = lib.createItem(splitted);
-    return splitted;
+    this.update = function(){
+      var vertices = this.shape.vertices;
+      var flap = Math.sin(this.wingsAngle);
+      vertices[this.z1] -= flap;
+      vertices[this.z2] -= flap;
+
+      this.wingsAngle = angleInc(this.wingsAngle);
+      flap = Math.sin(this.wingsAngle);
+
+      vertices[this.z1] += flap;
+      vertices[this.z2] += flap;
+
+      lib.removeItem(this.shape.item);
+      this.shape.item = lib.createItem(this.shape);
+    };
+  }
+
+  return function(triangle){
+    lib.removeItem(triangle.item);
+    triangle.item = undefined;
+
+    var bird = new Bird();
+    bird.init(triangle);
+    return bird;
   };
 });

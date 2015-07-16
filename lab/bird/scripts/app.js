@@ -5,8 +5,6 @@ module('app', [
   lib,
   bird
 ){
-  console.log('app');
-
   return {
     init: function(){
       lib.init({
@@ -33,7 +31,9 @@ module('app', [
 
       triangle.item = lib.createItem(triangle);
 
-      bird(triangle);
+      var b1 = bird(triangle);
+
+      setInterval(function(){ b1.update(); }, 30 / 1000);
     }
   };
 });
