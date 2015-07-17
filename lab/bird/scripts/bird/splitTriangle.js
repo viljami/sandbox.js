@@ -1,13 +1,11 @@
-module('splitTriangle', function(){
+module('splitTriangle', [
+  'array.flatten'
+], function(
+  flatten
+){
   var splitingIndexes = [[1, 0], [2, 0], [2, 1]];
 
-  var flatten = function(a){
-    return a.reduce(function(b, c){
-      return b.concat(Array.isArray(c) ? flatten(c) : c);
-    }, []);
-  };
-
-  var split = function(a, b){
+  var getMiddlePoint = function(a, b){
     return vec3.sub([], a, vec3.scale([], vec3.sub([], a, b), 0.5));
   };
 
@@ -19,7 +17,11 @@ module('splitTriangle', function(){
     return sorted[2];
   };
 
-  return function splitTriangleInTwo (triangle){
+  var selectiveGet = function(n, value){
+    return function(p, i){ return n === i ? value : p; };
+  };
+
+  return function splitTriangle (triangle){
     var vertices = triangle.vertices,
       colors = triangle.colors,
       points = [
@@ -37,19 +39,16 @@ module('splitTriangle', function(){
     }),
       splitting = vs.indexOf(getSplittingSide(vs)),
       ii = splitingIndexes[splitting],
-      splitPoint = split(points[ii[0]], points[ii[1]]),
-      selectiveGet = function(n, value){
-        return function(p, i){ return ii[n] === i ? value : p; };
-      },
+      splitPoint = getMiddlePoint(points[ii[0]], points[ii[1]]),
       newVertices = [
-        points.map(selectiveGet(0, splitPoint)),
-        points.map(selectiveGet(1, splitPoint))
+        points.map(selectiveGet(ii[0], splitPoint)),
+        points.map(selectiveGet(ii[1], splitPoint))
       ],
       splitColor = [];
     vec4.scale(splitColor, vec4.add([], colors[ii[0]], colors[ii[1]]), 0.5);
     var newColors = [
-      colors.map(selectiveGet(0, splitColor)),
-      colors.map(selectiveGet(1, splitColor))
+      colors.map(selectiveGet(ii[0], splitColor)),
+      colors.map(selectiveGet(ii[1], splitColor))
     ];
 
     return {
