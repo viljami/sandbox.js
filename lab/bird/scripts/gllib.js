@@ -1,4 +1,4 @@
-module('lib', [
+module('gllib', [
   'resize'
 ], function(
   resize
