@@ -1,12 +1,15 @@
-module('loadShaders', function(){
-  var shaderTypes = {
-    'x-shader/x-fragment': gl.FRAGMENT_SHADER,
-    'x-shader/x-vertex': gl.VERTEX_SHADER,
-    'fs': gl.FRAGMENT_SHADER,
-    'vs': gl.VERTEX_SHADER
-  };
-
+module('loadShaders', [
+  'loadFiles'
+], function(
+  loadFiles
+){
   var getShader = function (gl, type, shaderString) {
+    var shaderTypes = {
+      'x-shader/x-fragment': gl.FRAGMENT_SHADER,
+      'x-shader/x-vertex': gl.VERTEX_SHADER,
+      'fs': gl.FRAGMENT_SHADER,
+      'vs': gl.VERTEX_SHADER
+    };
     var shader = gl.createShader(shaderTypes[type]);
     gl.shaderSource(shader, shaderString);
     gl.compileShader(shader);

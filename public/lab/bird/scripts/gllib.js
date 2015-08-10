@@ -1,12 +1,13 @@
 module('gllib', [
-  'resize'
+  'resize',
+  'loadShaders'
 ], function(
-  resize
+  resize,
+  loadShaders
 ){
   var mvMatrix = mat4.create();
   var pMatrix = mat4.create();
   var items = [];
-  var shaderTypes;
 
   var mvMatrixStack = [];
   function mvPushMatrix() {

@@ -7,8 +7,6 @@ module('bird', [
   splitTriangle,
   takeOff
 ){
-  var PI02 = Math.PI / 2;
-  var PI12 = Math.PI + PI02;
   var PI2 = Math.PI * 2;
   var Z_INDEX = 2;
   var FULL_FLAP = PI2;
@@ -16,14 +14,8 @@ module('bird', [
   var modes = {
     takeOff: takeOff,
     still: function(){
-      return function(){ return {duration: 2000, holdStill: true}; }
+      return function(){ return {duration: 2000, holdStill: true}; };
     }
-  };
-
-  var angleInc = function(a, inc){
-    a += inc;
-    if (a < PI02 && a > PI12) a += inc * 2;
-    return a < PI2 ? a : 0;
   };
 
   var rot = function(min, max, n){ return n < min ? max : n > max ? min : n; };

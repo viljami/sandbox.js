@@ -10,8 +10,8 @@ module('app', [
       gllib.init({
         canvas: document.getElementsByTagName('canvas')[0],
         shaderPaths: [
-          '/shaders/light-color.vs',
-          '/shaders/light-color.fs'
+          '/lessons/shaders/light-color.vs',
+          '/lessons/shaders/light-color.fs'
         ]
       });
 
