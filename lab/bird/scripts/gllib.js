@@ -102,6 +102,7 @@ module('gllib', [
 
       setMatrixUniforms(gl, shaderProgram);
       gl.drawArrays(gl.TRIANGLES, 0, item.vertexPositionBuffer.numItems);
+      // gl.drawArrays(gl.LINE_LOOP, 0, item.vertexPositionBuffer.numItems);
 
       mvPopMatrix();
     });
