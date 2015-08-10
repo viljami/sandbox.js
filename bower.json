@@ -7,7 +7,6 @@
   "description": "WebGl lessons",
   "main": "index.js",
   "moduleType": [
-    "amd",
     "globals"
   ],
   "keywords": [
