@@ -1,0 +1,107 @@
+<!Doctype html>
+<html>
+<head>
+<style>
+html, body, canvas {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background-color: #eee;
+}
+.info {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-family: arial;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+p, h1 {
+  margin: 0;
+  padding: 5px;
+}
+
+</style>
+<script src="scripts/split-polygon-3d.js"></script>
+</head>
+<body>
+<canvas></canvas>
+<div class="info">
+  <h1>Iteration: <span id="iteration"></span>, Vertices: <span id="total"></span></h1>
+  <p>Rectangle is two triangles. Each triangle has 3 vertices. We split the sides of the triangles again and again.</p>
+</div>
+<script>
+var verticesElement = document.getElementById('total');
+var iterationElement = document.getElementById('iteration');
+
+var canvas = document.getElementsByTagName('canvas')[0];
+var context = canvas.getContext('2d');
+var counter = 1;
+var rectangleVertices = [
+  -1, -1, 1, 1, -1, 1, 1, 1, 1,
+  1, 1, 1, -1, 1, 1, -1, -1, 1
+];
+
+function get(n){ return n; }
+function copyArray (a){ return a.map(get); }
+var processedVertices = copyArray(rectangleVertices);
+
+function drawPolygonLines(x, y , polygon, scale){
+  context.save();
+  context.translate(x, y);
+
+  var path = new Path2D();
+  for(var i = 0; i < polygon.length / 9; i++){
+   path.moveTo(polygon[i * 9] * scale, polygon[i * 9 + 1] * scale);
+   path.lineTo(polygon[i * 9 + 3] * scale, polygon[i * 9 + 4] * scale);
+   path.lineTo(polygon[i * 9 + 6] * scale, polygon[i * 9 + 7] * scale);
+   path.closePath();
+  }
+  context.stroke(path);
+  context.restore();
+}
+
+function draw(){
+  requestAnimationFrame(draw);
+
+  updateStats();
+
+  context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  var scale = (window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight) / 4 - 100;
+  drawPolygonLines(window.innerWidth / 2, window.innerHeight / 2, processedVertices, scale);
+}
+draw();
+
+function updateStats(){
+  verticesElement.innerText = processedVertices.length / 3;
+  iterationElement.innerText = counter;
+}
+
+setInterval(function(){
+  if (counter >= 7){
+    if (counter <= 9) {
+      counter = 1;
+      processedVertices = copyArray(rectangleVertices);
+    }
+    return;
+  }
+
+  processedVertices = splitPolygon3d(processedVertices);
+  counter++;
+}, 1000);
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+</script>
+
+</body>
+</html>

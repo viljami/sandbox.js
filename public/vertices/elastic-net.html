@@ -1,0 +1,162 @@
+<!Doctype html>
+<html>
+<head>
+<style>
+html, body, canvas {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+.info {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-family: arial;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+p, h1 {
+  margin: 0;
+  padding: 5px;
+}
+
+</style>
+<script src="lib/is-touch-device.js"></script>
+<script src="lib/controls.js"></script>
+
+<script src="split-polygon-2d.js"></script>
+</head>
+<body>
+<canvas></canvas>
+<div class="info">
+  <h1>Swipe or move mouse over vertices.</h1>
+</div>
+<script>
+
+var RADIUS = 100;
+var scale = 100;
+
+controls.enable();
+var mouse = controls.mouse;
+
+var x = window.innerWidth / 2;
+var y = window.innerHeight / 2;
+var verticesElement = document.getElementById('total');
+var iterationElement = document.getElementById('iteration');
+var canvas = document.getElementsByTagName('canvas')[0];
+var context = canvas.getContext('2d');
+var counter = 1;
+
+// actually cube vertices... !!
+var rectangleVertices = [
+  -1, -1, 1, -1, 1, 1,
+  1, 1, -1, 1, -1, -1
+];
+
+var polygonVertices = copyArray(rectangleVertices);
+polygonVertices = splitPolygon2d(polygonVertices);
+polygonVertices = splitPolygon2d(polygonVertices);
+polygonVertices = splitPolygon2d(polygonVertices);
+polygonVertices = splitPolygon2d(polygonVertices);
+
+var savedVertices = copyArray(polygonVertices);
+
+function get(n){ return n; }
+function copyArray (a){ return a.map(get); }
+
+function drawPolygonLines(x, y , polygon){
+  context.save();
+  context.translate(x, y);
+
+  var path = new Path2D();
+  for(var i = 0; i < polygon.length / 6; i++){
+    path.moveTo(polygon[i * 6] * scale, polygon[i * 6 + 1] * scale);
+    path.lineTo(polygon[i * 6 + 2] * scale, polygon[i * 6 + 3] * scale);
+    path.lineTo(polygon[i * 6 + 4] * scale, polygon[i * 6 + 5] * scale);
+    path.closePath();
+  }
+
+  context.stroke(path);
+  context.restore();
+}
+
+function draw(){
+  requestAnimationFrame(draw);
+
+  context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  drawPolygonLines(x, y, polygonVertices);
+}
+
+function updateStats(){
+  verticesElement.innerText = polygonVertices.length / 3;
+  iterationElement.innerText = counter;
+}
+
+function isInCircle(x1, y1, x2, y2, r){
+  return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) < Math.pow(r, 2);
+}
+
+function testMouse(xx, yy, r){
+  return isInCircle(xx, yy, mouse.x, mouse.y, r);
+}
+
+function length (v){
+  return Math.sqrt(Math.pow(v[0], 2) + Math.pow(v[1], 2));
+}
+
+setInterval(function(){
+  var xx, yy, p, s, l, v = [];
+  for (var i = 0; i < polygonVertices.length / 2; i++){
+    p = polygonVertices.slice(i * 2, i * 2 + 2);
+
+    xx = p[0] * scale + x;
+    yy = p[1] * scale + y;
+
+    if (testMouse(xx, yy, RADIUS + 10)){
+      if (testMouse(xx, yy, RADIUS)){
+        v[0] = xx - mouse.x;
+        v[1] = yy - mouse.y;
+        l = length(v);
+
+        p[0] += v[0] / l / scale * 2;
+        p[1] += v[1] / l / scale * 2;
+        polygonVertices[i * 2] = p[0];
+        polygonVertices[i * 2 + 1] = p[1];
+      }
+    } else {
+      s = savedVertices.slice(i * 2, i * 2 + 2);
+
+      if (! isInCircle(p[0], p[1], s[0], s[1], 0.01)){
+        v[0] = p[0] - s[0];
+        v[1] = p[1] - s[1];
+
+        polygonVertices[i * 2] -= v[0] * 0.01;
+        polygonVertices[i * 2 + 1] -= v[1] * 0.01;
+      }
+    }
+  }
+}, 1000 / 30);
+
+function resize(){
+  scale = (window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight) / 2 - 100;
+  if (scale < 100) scale = 100;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  x = window.innerWidth / 2;
+  y = window.innerHeight / 2;
+}
+window.addEventListener('resize', resize);
+resize();
+
+draw();
+
+</script>
+
+</body>
+</html>

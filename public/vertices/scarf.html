@@ -1,0 +1,247 @@
+<!Doctype html>
+<html>
+<head>
+<style>
+html, body, canvas {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background-color: #eee;
+}
+.info {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-family: arial;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+p, h1 {
+  margin: 0;
+  padding: 5px;
+}
+
+</style>
+<script src="lib/is-touch-device.js"></script>
+<script src="lib/controls.js"></script>
+
+<script src="split-polygon-2d.js"></script>
+</head>
+<body>
+<canvas></canvas>
+<div class="info">
+  <h1>Scarf.</h1>
+</div>
+<script>
+
+var RADIUS = 25;
+var scale = 100;
+
+controls.enable();
+var friction = 0.25;
+var gravity = 0.2;
+var mouse = controls.mouse;
+var worldX = window.innerWidth / 2;
+var worldY = window.innerHeight / 2;
+var canvas = document.getElementsByTagName('canvas')[0];
+var context = canvas.getContext('2d');
+var counter = 1;
+
+function createGrid(){
+  var vertices = [];
+  for (var x = 0; x < 10; x++){
+    vertices[x] = [];
+    for (var y = 0; y < 10; y++){
+      vertices[x][y] = [0, 0, 0, 0];
+    }
+  }
+  return vertices;
+}
+
+var vertices = createGrid();
+console.log(vertices);
+
+function up(x, y){
+  if (y - 1 < 0) return undefined;
+  return [x, y - 1];
+}
+
+function down(x, y, n){
+  if (y + 1 >= n) return undefined;
+  return [x, y + 1];
+}
+
+function left(x, y){
+  if (x - 1 < 0) return undefined;
+  return [x - 1, y];
+}
+
+function right(x, y, n){
+  if (x + 1 >= n) return undefined;
+  return [x + 1, y];
+}
+
+function drawPolygonLines(worldX, worldY, polygon, scale){
+  var path = new Path2D();
+  var w2 = polygon.length / 2 * scale;
+  var h2;
+
+  context.save();
+  context.translate(worldX, worldY);
+
+  for (var x = 0; x < polygon.length; x++){
+    h2 = polygon.length / 2 * scale;
+
+    for (var y = 0; y < polygon[x].length; y++){
+      var directions = [
+        up(x, y),
+        down(x, y, polygon[x].length),
+        left(x, y),
+        right(x, y, polygon.length)
+      ];
+
+      for (var k = 0; k < polygon.length; k++){
+        if (directions[k]){
+          path.moveTo(
+            directions[k][0] * scale - w2 + vertices[directions[k][0]][directions[k][1]][0],
+            directions[k][1] * scale - h2 + vertices[directions[k][0]][directions[k][1]][1]
+          );
+          path.lineTo(
+            x * scale - w2 + vertices[x][y][0],
+            y * scale - h2 + vertices[x][y][1]
+          );
+        }
+      }
+    }
+  }
+
+  context.stroke(path);
+  context.restore();
+}
+
+function draw(){
+  requestAnimationFrame(draw);
+
+  context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  drawPolygonLines(
+    window.innerWidth / 2,
+    window.innerHeight / 2,
+    vertices,
+    40
+  );
+}
+
+
+function isInCircle(x1, y1, x2, y2, r){
+  return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) < Math.pow(r, 2);
+}
+
+function length (v){
+  return Math.sqrt(Math.pow(v[0], 2) + Math.pow(v[1], 2));
+}
+
+function update(){
+  for (var x = 0; x < vertices.length; x++){
+    for (var y = 0; y < vertices[x].length; y++){
+      var directions = [
+        up(x, y),
+        down(x, y, vertices[x].length),
+        left(x, y),
+        right(x, y, vertices.length)
+      ];
+
+      for (var k = 0; k < vertices.length; k++){
+        if (directions[k]){
+          var p1 = vertices[directions[k][0]][directions[k][1]];
+          var p2 = vertices[x][y];
+          var v = [p1[2] - p2[2], p1[3] - p2[3]];
+          var l = length(v);
+          if (l !== 0 && l !== 1) {
+            p1[2] -= v[2] / l;
+            p1[3] -= v[3] / l - gravity;
+          }
+        }
+      }
+    }
+  }
+}
+// setInterval(update, 1000 / 30);
+
+setInterval(function(){
+  var xx, yy, x, y, s, l, f, v = [], p = [];
+  var w2 = vertices.length / 2 * scale;
+  var h2;
+
+  for (x = 0; x < vertices.length; x++){
+    h2 = vertices.length / 2 * scale;
+    xx = x * scale - w2 + worldX;
+    for (y = 0; y < vertices[x].length; y++){
+      yy = y * scale - h2 + worldY;
+      vertices[x][y][0] *= friction;
+      vertices[x][y][1] *= friction;
+
+      if (isInCircle(xx, yy, mouse.x, mouse.y, RADIUS + 10)){
+        if (isInCircle(xx, yy, mouse.x, mouse.y, RADIUS)){
+          v[0] = (xx - mouse.x);
+          v[1] = (yy - mouse.y);
+          l = length(v);
+          v[0] /= l * scale;
+          v[1] /= l * scale;
+
+          vertices[x][y][2] = v[0];
+          vertices[x][y][3] = v[1];
+        }
+      } else {
+        var directions = [
+          up(x, y),
+          down(x, y, vertices[x].length),
+          left(x, y),
+          right(x, y, vertices.length)
+        ];
+
+        for (var k = 0; k < vertices.length; k++){
+          if (directions[k]){
+            f = vertices[directions[k][0]][directions[k][1]];
+            vertices[x][y][2] += f[2];
+            vertices[x][y][3] += f[3];
+
+            vertices[x][y][2] *= friction;
+            vertices[x][y][3] *= friction;
+          }
+        }
+      }
+
+      if (x === 0 && y===0){
+        vertices[x][y][0] = 0;
+        vertices[x][y][1] = 0;
+      } else {
+        vertices[x][y][0] += vertices[x][y][2] * 0.1;
+        vertices[x][y][1] += vertices[x][y][3] * 0.1;
+      }
+    }
+  }
+}, 1000 / 30);
+
+function resize(){
+  scale = (window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight) / 2 - 100;
+  if (scale < 100) scale = 100;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  worldX = window.innerWidth / 2;
+  worldY = window.innerHeight / 2;
+}
+window.addEventListener('resize', resize);
+resize();
+
+draw();
+
+</script>
+
+</body>
+</html>

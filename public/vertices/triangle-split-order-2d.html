@@ -1,0 +1,74 @@
+<!Doctype html>
+<html>
+<head>
+<style>
+html, body, canvas {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: #eee;
+}
+h1 {
+  position: absolute;
+  bottom:0;
+  left: 0;
+  right: 0;
+  font-family: arial;
+  text-align: center;
+}
+</style>
+<script src="scripts/split-polygon-2d.js"></script>
+</head>
+<body>
+<canvas></canvas>
+<h1>Order the split happens (and split of a splits, triangles =<span id="count"></span>).</h1>
+<script>
+var canvas = document.getElementsByTagName('canvas')[0];
+var context = canvas.getContext('2d');
+
+// actually 3d polygons presented in 2d;
+var triangleVertices = [200, 200, -200, 200, -200, -200];
+triangleVertices = splitPolygon2d(triangleVertices);
+triangleVertices = splitPolygon2d(triangleVertices);
+triangleVertices = splitPolygon2d(triangleVertices);
+triangleVertices = splitPolygon2d(triangleVertices);
+triangleVertices = splitPolygon2d(triangleVertices);
+triangleVertices = splitPolygon2d(triangleVertices);
+
+count.innerText = triangleVertices.length / 2;
+
+function drawRectangle(polygon, i, path){
+  var ii = i * 6;
+  path.moveTo(polygon[ii], polygon[ii + 1]);
+  path.lineTo(polygon[ii + 2], polygon[ii + 3]);
+  path.lineTo(polygon[ii + 4], polygon[ii + 5]);
+  path.closePath();
+}
+
+function oneByOne(polygon, i, path){
+  drawRectangle(polygon, i, path);
+  context.stroke(path);
+  if (i < polygon.length / 6 - 1) return setTimeout(oneByOne.bind(this, polygon, i + 1, path));
+  context.restore();
+}
+
+function drawPolygonLines(x, y, polygon){
+  context.save();
+  context.translate(x, y);
+  var path = new Path2D();
+  oneByOne(polygon, 0, path);
+}
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  drawPolygonLines(window.innerWidth / 2, window.innerHeight / 2, triangleVertices, 100);
+}
+window.addEventListener('resize', resize);
+resize();
+</script>
+
+</body>
+</html>
